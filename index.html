@@ -1,0 +1,2046 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#e9efdc">
+<title>ТАПАЙ КАПИБАРУ</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#e9efdc;--card:#fffdf4;--green:#66894f;
+--text:#35432d;--muted:#89947d;--gold:#ecad42;
+}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif;user-select:none}
+body.dark{--bg:#1e291f;--card:#303d2e;--text:#eef3e5;--muted:#a7b49e}
+button,input{font:inherit}
+button{cursor:pointer;border:0;border-radius:16px;padding:13px;background:var(--green);color:white;font-weight:bold}
+button:active{transform:scale(.96)}
+button:disabled{opacity:.45;cursor:default}
+input{width:100%;padding:14px;border:1px solid #aaba9c;border-radius:12px;background:var(--card);color:var(--text)}
+#app{max-width:550px;margin:auto;min-height:100dvh;padding:18px 16px 105px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.logo{font-size:19px;font-weight:900}
+.small{font-size:12px;color:var(--muted)}
+.avatar{font-size:29px;background:var(--card);padding:9px;border-radius:18px}
+.card{background:var(--card);border-radius:22px;padding:16px;margin-bottom:12px;box-shadow:0 4px 12px #34482b09}
+.balance{text-align:center;padding:20px}
+.money{font-size:42px;font-weight:900;margin:8px 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{text-align:center;padding:12px 4px;background:var(--card);border-radius:17px;font-size:12px}
+.stat b{font-size:17px;display:block;margin-top:6px}
+.bar{height:12px;border-radius:20px;background:#a1b28f40;overflow:hidden;margin:10px 0}
+.fill{height:100%;background:linear-gradient(90deg,#91b864,#5a8d48);border-radius:20px;transition:width .2s}
+.energy-fill{background:linear-gradient(90deg,#ffd66d,#eea53b)}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#habitat{position:relative;height:290px;border-radius:36px;margin:15px 0;overflow:hidden;display:grid;place-items:center;background:linear-gradient(#d3e8c4,#ebf3d9 66%,#b6d29a 67%)}
+#habitat.beach{background:linear-gradient(#abdfea 55%,#71becd 56%,#f7dfad 75%)}
+#habitat.night{background:linear-gradient(#26334e,#566a88 70%,#334c3c 71%)}
+#habitat.forest{background:linear-gradient(#8eb28b,#b9d6a4 70%,#628753 71%)}
+#capy{width:95%;max-width:310px;background:none;padding:0;position:relative;z-index:2;touch-action:manipulation}
+#capy svg{width:100%;overflow:visible;filter:drop-shadow(0 10px 5px #35432d25)}
+#capy.hit{animation:bounce .2s ease}
+@keyframes bounce{50%{transform:scale(.91) rotate(-2deg)}}
+.float{position:absolute;font-weight:900;font-size:27px;color:#fff;text-shadow:0 2px 4px #604b22;pointer-events:none;z-index:5;animation:rise .8s forwards}
+@keyframes rise{to{transform:translateY(-100px);opacity:0}}
+.flowers{position:absolute;bottom:15px;left:15px;font-size:23px}
+.flowers.right{left:auto;right:15px}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:550px;background:var(--card);display:flex;padding:8px 5px calc(8px + env(safe-area-inset-bottom));border-radius:25px 25px 0 0;box-shadow:0 -5px 25px #0001;z-index:10}
+nav button{flex:1;background:none;color:var(--muted);padding:9px 0;font-size:10px}
+nav button span{display:block;font-size:24px;margin-bottom:5px}
+nav button.active{color:var(--green);background:#9db77b25}
+.page{display:none}
+.page.active{display:block}
+h2{font-size:23px;margin:12px 0 18px}
+h3{margin:15px 0 10px}
+.item{display:flex;align-items:center;gap:12px}
+.item-icon{font-size:32px;min-width:43px;text-align:center}
+.item-body{flex:1;min-width:0}
+.item-body p{font-size:12px;color:var(--muted);margin:6px 0}
+.item button{font-size:12px;padding:11px;max-width:120px}
+.tabs{display:flex;gap:7px;margin-bottom:15px;overflow:auto}
+.tabs button{white-space:nowrap;font-size:12px;background:var(--card);color:var(--text)}
+.tabs button.active{background:var(--green);color:#fff}
+#toast{position:fixed;top:20px;left:50%;transform:translate(-50%,-150px);padding:14px 22px;background:#344c2b;color:white;border-radius:16px;z-index:30;text-align:center;max-width:92%;transition:.3s}
+#toast.show{transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:#0007;z-index:20;display:none;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-box{background:var(--card);padding:25px;border-radius:26px;width:100%;max-width:390px;text-align:center}
+.full{width:100%;margin-top:10px}
+.gold{background:#d79932}
+.danger{background:#b55e52}
+.setting{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid #8a9c7928}
+.setting input{width:22px;height:22px;accent-color:var(--green)}
+.reward{color:#71964e;font-weight:bold}
+.preview{width:46px;height:46px;border-radius:15px}
+body.no-animation *{animation:none!important;transition:none!important}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+<div id="app">
+
+<header>
+<div>
+<div class="logo">🦫 ТАПАЙ КАПИБАРУ</div>
+<div class="small">Уютное капибара-приключение</div>
+</div>
+<button class="avatar" onclick="go('profile')">🦫</button>
+</header>
+
+<section class="page active" id="game">
+<div class="card balance">
+<div class="small">Твои монеты</div>
+<div class="money">🪙 <span class="coins">0</span></div>
+<div class="small" id="multiplierText">Множитель ×1</div>
+</div>
+
+<div class="stats">
+<div class="stat">За тап<b id="tapPower">+1</b></div>
+<div class="stat">Доход/сек<b id="income">0</b></div>
+<div class="stat">Уровень<b id="level">1</b></div>
+</div>
+
+<div style="margin-top:15px" class="between">
+<b id="rankName">Малыш капибара</b>
+<span class="small" id="xpText"></span>
+</div>
+<div class="bar"><div class="fill" id="xpBar"></div></div>
+
+<div id="habitat">
+<div class="flowers">🌿🌼</div>
+<div class="flowers right">🌱🌷</div>
+
+<button id="capy" aria-label="Нажать на капибару">
+<svg viewBox="0 0 320 250">
+<ellipse cx="159" cy="223" rx="125" ry="13" fill="#000" opacity=".08"/>
+<g id="capyBody" fill="#bb8855" stroke="#795334" stroke-width="4">
+<rect x="69" y="181" width="36" height="40" rx="15"/>
+<rect x="203" y="181" width="36" height="40" rx="15"/>
+<ellipse cx="153" cy="150" rx="113" ry="67"/>
+<ellipse cx="194" cy="83" rx="16" ry="23"/>
+<ellipse cx="240" cy="82" rx="16" ry="23"/>
+<rect x="152" y="86" width="145" height="109" rx="44"/>
+</g>
+<ellipse cx="246" cy="155" rx="48" ry="34" fill="#cda779"/>
+<ellipse cx="272" cy="143" rx="17" ry="10" fill="#604a36"/>
+<path d="M272 151 Q266 168 251 164" fill="none" stroke="#604a36" stroke-width="3" stroke-linecap="round"/>
+<ellipse cx="195" cy="124" rx="6" ry="9" fill="#342d25"/>
+<ellipse cx="255" cy="118" rx="6" ry="9" fill="#342d25"/>
+<ellipse cx="182" cy="143" rx="12" ry="7" fill="#eaa08a" opacity=".6"/>
+<g id="accessoryOrange">
+<circle cx="217" cy="62" r="23" fill="#f8a32c" stroke="#d98b24" stroke-width="3"/>
+<ellipse cx="209" cy="54" rx="6" ry="4" fill="#ffd17a"/>
+<path d="M217 40 Q217 24 237 28 Q235 44 217 40" fill="#739c47"/>
+</g>
+<text id="accessoryOther" x="215" y="79" font-size="48" text-anchor="middle"></text>
+</svg>
+</button>
+</div>
+
+<div class="card">
+<div class="between">
+<b>⚡ Энергия</b>
+<b id="energyText"></b>
+</div>
+<div class="bar">
+<div class="fill energy-fill" id="energyBar"></div>
+</div>
+<div class="small" id="regenText"></div>
+</div>
+
+<div class="between">
+<button class="gold" style="flex:1" onclick="claimGift()">🎁 Подарок</button>
+<button style="flex:1" onclick="freeBonus()">🚀 Бонус</button>
+</div>
+</section>
+
+<section class="page" id="shop">
+<h2>🛍 Магазин</h2>
+<div class="card">🪙 <b class="coins">0</b> монет</div>
+<div class="tabs" id="shopTabs">
+<button onclick="shopTab('upgrades',this)" class="active">Улучшения</button>
+<button onclick="shopTab('skins',this)">Скины</button>
+<button onclick="shopTab('accessories',this)">Аксессуары</button>
+<button onclick="shopTab('backgrounds',this)">Фоны</button>
+</div>
+<div id="shopContent"></div>
+</section>
+
+<section class="page" id="tasks">
+<h2>📋 Задания</h2>
+<div class="card">
+<div class="between">
+<div><b>🎁 Ежедневный подарок</b><p class="small" id="giftInfo"></p></div>
+<button onclick="claimGift()">Забрать</button>
+</div>
+</div>
+<h3>Ежедневные задания</h3>
+<div id="dailyTasks"></div>
+<h3>Достижения</h3>
+<div id="achievements"></div>
+</section>
+
+<section class="page" id="rating">
+<h2>🏆 Таблица лидеров</h2>
+<div class="card">
+<b>Локальный рейтинг</b>
+<p class="small">Лучшие результаты сохранённых профилей на этом устройстве. Интернет-рейтинг пока не подключён.</p>
+</div>
+<div id="leaderboard"></div>
+</section>
+
+<section class="page" id="profile">
+<h2>👤 Профиль</h2>
+<div class="card" style="text-align:center">
+<div style="font-size:65px">🦫</div>
+<h2 id="profileName"></h2>
+<p id="profileLevel"></p>
+<input id="nameInput" maxlength="24" placeholder="Новое имя">
+<button class="full" onclick="rename()">Изменить имя</button>
+</div>
+<h3>Статистика</h3>
+<div class="card" id="statistics"></div>
+
+<h3>Промокоды</h3>
+<div class="card">
+<input id="promoInput" placeholder="Введите промокод">
+<button class="full" onclick="redeem()">Активировать</button>
+<p class="small">Стартовый код: CAPY2026</p>
+</div>
+
+<h3>Настройки</h3>
+<div class="card">
+<label class="setting">🔊 Звуки
+<input type="checkbox" id="soundSetting" onchange="setting('sound',this.checked)">
+</label>
+<label class="setting">📳 Вибрация
+<input type="checkbox" id="vibrationSetting" onchange="setting('vibration',this.checked)">
+</label>
+<label class="setting">✨ Анимации
+<input type="checkbox" id="animationSetting" onchange="setting('animation',this.checked)">
+</label>
+<label class="setting">🌙 Тёмная тема
+<input type="checkbox" id="darkSetting" onchange="setting('dark',this.checked)">
+</label>
+</div>
+
+<div class="card">
+<b>Сохранение игры</b>
+<p class="small">Автоматическое локальное сохранение включено.</p>
+<button class="full" onclick="exportSave()">Экспорт прогресса</button>
+<button class="full" onclick="document.getElementById('importFile').click()">Импорт прогресса</button>
+<input type="file" id="importFile" accept=".json" hidden onchange="importSave(event)">
+<button class="full danger" onclick="resetGame()">Сбросить прогресс</button>
+</div>
+<p class="small" style="text-align:center">ТАПАЙ КАПИБАРУ • Версия 1.0</p>
+</section>
+</div>
+
+<nav>
+<button class="active" data-page="game" onclick="go('game')"><span>🦫</span>Игра</button>
+<button data-page="shop" onclick="go('shop')"><span>🛍</span>Магазин</button>
+<button data-page="tasks" onclick="go('tasks')"><span>📋</span>Задания</button>
+<button data-page="rating" onclick="go('rating')"><span>🏆</span>Рейтинг</button>
+<button data-page="profile" onclick="go('profile')"><span>👤</span>Профиль</button>
+</nav>
+
+<div class="modal" id="modal">
+<div class="modal-box">
+<div id="modalContent"></div>
+<button class="full" onclick="closeModal()">Продолжить</button>
+</div>
+</div>
+
+<script>
+const KEY='capybara_game_v1';
+const $=id=>document.getElementById(id);
+const today=()=>new Date().toLocaleDateString('en-CA');
+const fmt=n=>Math.floor(n).toLocaleString('ru-RU');
+const fresh=()=>({
+id:Date.now().toString(36)+Math.random().toString(36).slice(2),
+name:'Капибаровод',
+coins:0,
+earned:0,
+taps:0,
+xp:0,
+energy:100,
+tap:1,
+capacity:1,
+regen:1,
+auto:0,
+passive:0,
+multi:1,
+purchases:0,
+seconds:0,
+giftDay:'',
+bonusDay:'',
+boostUntil:0,
+day:today(),
+daily:{taps:0,earned:0,purchases:0},
+claimedTasks:[],
+claimedAchievements:[],
+promos:[],
+owned:['classic','orange','meadow'],
+skin:'classic',
+accessory:'orange',
+background:'meadow',
+settings:{sound:true,vibration:true,animation:true,dark:false},
+lastSeen:Date.now()
+});
+
+let s=fresh();
+try{
+const stored=JSON.parse(localStorage.getItem(KEY));
+if(stored)s={...fresh(),...stored};
+}catch(e){}
+
+let page='game',category='upgrades';
+let lastTick=Date.now();
+let autoBank=0;
+let toastTimer;
+let audio;
+
+const skins=[
+{id:'classic',name:'Классическая',color:'#bb8855',price:0},
+{id:'chocolate',name:'Шоколадная',color:'#795338',price:500},
+{id:'golden',name:'Золотая',color:'#e7b44d',price:2000},
+{id:'pink',name:'Клубничная',color:'#e5a4b7',price:4500},
+{id:'mint',name:'Мятная',color:'#95c6a2',price:7500},
+{id:'cosmic',name:'Космическая',color:'#9994cf',price:15000}
+];
+
+const accessories=[
+{id:'orange',name:'Мандарин',icon:'🍊',price:0},
+{id:'flower',name:'Цветочек',icon:'🌼',price:300},
+{id:'hat',name:'Шляпа',icon:'🎩',price:1000},
+{id:'crown',name:'Корона',icon:'👑',price:5000},
+{id:'bow',name:'Бантик',icon:'🎀',price:1500},
+{id:'star',name:'Звёздочка',icon:'⭐',price:3500}
+];
+
+const backgrounds=[
+{id:'meadow',name:'Лужайка',icon:'🌿',price:0},
+{id:'beach',name:'Пляж',icon:'🏝️',price:1000},
+{id:'forest',name:'Лес',icon:'🌲',price:2500},
+{id:'night',name:'Звёздная ночь',icon:'🌙',price:5000}
+];
+
+const upgrades=[
+{key:'tap',icon:'👆',name:'Сила нажатия',desc:'+1 монета к базовому тапу',base:50},
+{key:'capacity',icon:'🔋',name:'Запас энергии',desc:'+100 максимальной энергии',base:100},
+{key:'regen',icon:'⚡',name:'Восстановление',desc:'+1 энергии в секунду',base:150},
+{key:'auto',icon:'🤖',name:'Автокликер',desc:'+1 автоматический тап в секунду',base:300},
+{key:'passive',icon:'💰',name:'Пассивный доход',desc:'+2 монеты в секунду',base:250},
+{key:'multi',icon:'🚀',name:'Множитель',desc:'+1 к множителю заработка',base:1500}
+];
+
+const tasks=[
+{id:'t1',name:'Активная капибара',icon:'👆',key:'taps',goal:200,reward:250},
+{id:'t2',name:'Копилка',icon:'🪙',key:'earned',goal:1000,reward:500},
+{id:'t3',name:'Прокачка',icon:'⬆️',key:'purchases',goal:3,reward:350}
+];
+
+const achievementList=[
+{id:'a1',name:'Первый тап',key:'taps',goal:1,reward:50},
+{id:'a2',name:'Сто нажатий',key:'taps',goal:100,reward:150},
+{id:'a3',name:'Тысяча нажатий',key:'taps',goal:1000,reward:1000},
+{id:'a4',name:'Богатая капибара',key:'earned',goal:10000,reward:2000},
+{id:'a5',name:'Мастер улучшений',key:'purchases',goal:20,reward:2500},
+{id:'a6',name:'Легенда капибар',key:'earned',goal:100000,reward:10000}
+];
+
+function dailyCheck(){
+if(s.day!==today()){
+s.day=today();
+s.daily={taps:0,earned:0,purchases:0};
+s.claimedTasks=[];
+}
+}
+
+function maxEnergy(){return s.capacity*100}
+
+function level(){return Math.floor(Math.sqrt(s.xp/100))+1}
+
+function multiplier(){
+return s.multi*(Date.now()<s.boostUntil?2:1);
+}
+
+function power(){return s.tap*multiplier()}
+
+function passiveIncome(){return s.passive*2*multiplier()}
+
+function cost(u){
+const n=s[u.key]-(u.key==='auto'||u.key==='passive'?0:1);
+return Math.floor(u.base*Math.pow(1.65,n));
+}
+
+function addCoins(n){
+dailyCheck();
+s.coins+=n;
+s.earned+=n;
+s.daily.earned+=n;
+}
+
+function save(){
+try{
+s.lastSeen=Date.now();
+localStorage.setItem(KEY,JSON.stringify(s));
+}catch(e){}
+}
+
+function toast(message){
+$('toast').textContent=message;
+$('toast').classList.add('show');
+clearTimeout(toastTimer);
+toastTimer=setTimeout(()=>$('toast').classList.remove('show'),2300);
+}
+
+function modal(title,message){
+$('modalContent').replaceChildren();
+const h=document.createElement('h2');
+h.textContent=title;
+const p=document.createElement('p');
+p.textContent=message;
+$('modalContent').append(h,p);
+$('modal').classList.add('show');
+}
+
+function closeModal(){$('modal').classList.remove('show')}
+
+function sound(){
+if(!s.settings.sound)return;
+try{
+audio=audio||new(window.AudioContext||window.webkitAudioContext)();
+audio.resume();
+const o=audio.createOscillator();
+const g=audio.createGain();
+o.type='sine';
+o.frequency.setValueAtTime(600,audio.currentTime);
+o.frequency.exponentialRampToValueAtTime(950,audio.currentTime+.08);
+g.gain.setValueAtTime(.06,audio.currentTime);
+g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.12);
+o.connect(g);g.connect(audio.destination);
+o.start();o.stop(audio.currentTime+.13);
+}catch(e){}
+}
+
+function tap(event){
+if(s.energy<1){toast('⚡ Энергия закончилась');return}
+const amount=power();
+const oldLevel=level();
+s.energy--;
+s.taps++;
+s.daily.taps++;
+s.xp++;
+addCoins(amount);
+
+sound();
+if(s.settings.vibration&&navigator.vibrate)navigator.vibrate(20);
+
+if(s.settings.animation){
+$('capy').classList.remove('hit');
+void $('capy').offsetWidth;
+$('capy').classList.add('hit');
+
+const f=document.createElement('div');
+f.className='float';
+f.textContent='+'+fmt(amount);
+const r=$('habitat').getBoundingClientRect();
+f.style.left=(event.clientX?Math.max(5,Math.min(r.width-65,event.clientX-r.left)):r.width/2)+'px';
+f.style.top=(event.clientY?Math.max(45,event.clientY-r.top):r.height/2)+'px';
+$('habitat').append(f);
+setTimeout(()=>f.remove(),800);
+}
+
+if(level()>oldLevel){
+addCoins(level()*100);
+toast('🎉 Новый уровень! +'+level()*100+' монет');
+}
+render();
+save();
+}
+
+$('capy').addEventListener('click',tap);
+
+function render(){
+document.querySelectorAll('.coins').forEach(e=>e.textContent=fmt(s.coins));
+$('tapPower').textContent='+'+fmt(power());
+$('income').textContent=fmt(passiveIncome()+s.auto*power());
+$('level').textContent=level();
+$('multiplierText').textContent='Множитель ×'+multiplier();
+$('energyText').textContent=fmt(s.energy)+' / '+maxEnergy();
+$('energyBar').style.width=Math.min(100,s.energy/maxEnergy()*100)+'%';
+$('regenText').textContent='Восстановление: +'+s.regen+' ⚡/сек';
+
+const l=level();
+const start=(l-1)**2*100,end=l*l*100;
+$('xpBar').style.width=((s.xp-start)/(end-start)*100)+'%';
+$('xpText').textContent=fmt(s.xp-start)+' / '+fmt(end-start)+' XP';
+
+$('rankName').textContent=l<5?'Малыш капибара':l<10?'Опытная капибара':l<20?'Мастер капибар':l<30?'Король капибар':'Легенда капибар';
+}
+
+function appearance(){
+const skin=skins.find(x=>x.id===s.skin)||skins[0];
+$('capyBody').setAttribute('fill',skin.color);
+$('accessoryOrange').style.display=s.accessory==='orange'?'':'none';
+$('accessoryOther').textContent=s.accessory==='orange'?'':(accessories.find(x=>x.id===s.accessory)?.icon||'');
+$('habitat').className=s.background==='meadow'?'':s.background;
+document.body.classList.toggle('dark',s.settings.dark);
+document.body.classList.toggle('no-animation',!s.settings.animation);
+}
+
+function go(name){
+page=name;
+document.querySelectorAll('.page').forEach(e=>e.classList.toggle('active',e.id===name));
+document.querySelectorAll('nav button').forEach(e=>e.classList.toggle('active',e.dataset.page===name));
+window.scrollTo(0,0);
+refreshPage();
+}
+
+function refreshPage(){
+render();
+if(page==='shop')renderShop();
+if(page==='tasks')renderTasks();
+if(page==='rating')renderRating();
+if(page==='profile')renderProfile();
+}
+
+function shopTab(name,button){
+category=name;
+document.querySelectorAll('#shopTabs button').forEach(b=>b.classList.toggle('active',b===button));
+renderShop();
+}
+
+function renderShop(){
+if(category==='upgrades'){
+$('shopContent').innerHTML=upgrades.map(u=>`
+<div class="card item">
+<div class="item-icon">${u.icon}</div>
+<div class="item-body">
+<b>${u.name}</b>
+<p>${u.desc}</p>
+<span class="small">Уровень ${s[u.key]}</span>
+</div>
+<button data-cost="${cost(u)}" ${s.coins<cost(u)?'disabled':''} onclick="buyUpgrade('${u.key}')">
+🪙 ${fmt(cost(u))}
+</button>
+</div>`).join('');
+return;
+}
+const list=category==='skins'?skins:category==='accessories'?accessories:backgrounds;
+const field=category==='skins'?'skin':category==='accessories'?'accessory':'background';
+
+$('shopContent').innerHTML=list.map(i=>{
+const owned=s.owned.includes(i.id);
+const active=s[field]===i.id;
+return `<div class="card item">
+<div class="item-icon">${i.color?`<div class="preview" style="background:${i.color}"></div>`:i.icon}</div>
+<div class="item-body"><b>${i.name}</b>
+<p>${active?'Используется':owned?'Куплено':'Коллекционный предмет'}</p>
+</div>
+<button ${active||(!owned&&s.coins<i.price)?'disabled':''}
+data-cost="${owned?0:i.price}"
+onclick="buyItem('${field}','${i.id}')">${active?'Выбрано':owned?'Выбрать':'🪙 '+fmt(i.price)}</button>
+</div>`;
+}).join('');
+}
+
+function purchase(){
+dailyCheck();
+s.purchases++;
+s.daily.purchases++;
+}
+
+function buyUpgrade(key){
+const u=upgrades.find(x=>x.key===key);
+if(!u||s.coins<cost(u))return;
+s.coins-=cost(u);
+s[key]++;
+if(key==='capacity')s.energy=Math.min(maxEnergy(),s.energy+100);
+purchase();
+sound();
+toast('Улучшение куплено!');
+refreshPage();
+save();
+}
+
+function buyItem(field,id){
+const list=field==='skin'?skins:field==='accessory'?accessories:backgrounds;
+const item=list.find(x=>x.id===id);
+if(!item)return;
+if(!s.owned.includes(id)){
+if(s.coins<item.price)return;
+s.coins-=item.price;
+s.owned.push(id);
+purchase();
+}
+s[field]=id;
+appearance();
+refreshPage();
+save();
+}
+
+function claimGift(){
+dailyCheck();
+if(s.giftDay===today()){toast('Подарок уже получен сегодня');return}
+s.giftDay=today();
+addCoins(500);
+s.energy=maxEnergy();
+modal('🎁 Ежедневный подарок','Получено 500 монет и полностью восстановлена энергия!');
+refreshPage();
+save();
+}
+
+function freeBonus(){
+if(s.bonusDay===today()){toast('Бонус уже использован сегодня');return}
+s.bonusDay=today();
+s.boostUntil=Date.now()+5*60*1000;
+addCoins(200);
+s.energy=maxEnergy();
+modal('🚀 Бесплатный бонус','200 монет, полная энергия и двойной заработок на 5 минут.');
+refreshPage();
+save();
+}
+
+function renderTasks(){
+dailyCheck();
+$('giftInfo').textContent=s.giftDay===today()?'Сегодня получен':'500 монет и полная энергия';
+$('dailyTasks').innerHTML=tasks.map(t=>rewardCard(t,false)).join('');
+$('achievements').innerHTML=achievementList.map(t=>rewardCard(t,true)).join('');
+}
+
+function rewardCard(t,achievement){
+const value=achievement?s[t.key]:s.daily[t.key];
+const claimed=(achievement?s.claimedAchievements:s.claimedTasks).includes(t.id);
+return `<div class="card">
+<div class="between">
+<b>${t.icon||'🏅'} ${t.name}</b>
+<span class="reward">+${fmt(t.reward)} 🪙</span>
+</div>
+<div class="bar"><div class="fill" style="width:${Math.min(100,value/t.goal*100)}%"></div></div>
+<div class="between">
+<span class="small">${fmt(Math.min(value,t.goal))} / ${fmt(t.goal)}</span>
+<button ${claimed||value<t.goal?'disabled':''} onclick="claimReward('${t.id}',${achievement})">${claimed?'Получено':'Забрать'}</button>
+</div></div>`;
+}
+
+function claimReward(id,achievement){
+dailyCheck();
+const t=(achievement?achievementList:tasks).find(x=>x.id===id);
+const claimed=achievement?s.claimedAchievements:s.claimedTasks;
+if(!t||claimed.includes(id))return;
+if((achievement?s[t.key]:s.daily[t.key])<t.goal)return;
+claimed.push(id);
+addCoins(t.reward);
+toast('🎉 +'+fmt(t.reward)+' монет');
+refreshPage();
+save();
+}
+
+function escapeHTML(str){
+return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderRating(){
+let records=[];
+try{records=JSON.parse(localStorage.getItem('capy_ranking')||'[]')}catch(e){}
+if(!Array.isArray(records))records=[];
+records=records.filter(r=>r.id!==s.id);
+records.push({id:s.id,name:s.name,earned:s.earned,level:level()});
+records.sort((a,b)=>b.earned-a.earned);
+records=records.slice(0,50);
+localStorage.setItem('capy_ranking',JSON.stringify(records));
+
+$('leaderboard').innerHTML=records.map((r,i)=>`
+<div class="card item">
+<div class="item-icon">${['🥇','🥈','🥉'][i]||i+1}</div>
+<div class="item-body">
+<b>${escapeHTML(r.name)} ${r.id===s.id?'(Ты)':''}</b>
+<p>Уровень ${r.level}</p>
+</div>
+<b>${fmt(r.earned)} 🪙</b>
+</div>`).join('');
+}
+
+function renderProfile(){
+$('profileName').textContent=s.name;
+$('profileLevel').textContent='Уровень '+level();
+$('statistics').innerHTML=[
+['Всего заработано',fmt(s.earned)+' 🪙'],
+['Баланс',fmt(s.coins)+' 🪙'],
+['Всего нажатий',fmt(s.taps)],
+['Уровень',level()],
+['Опыт',fmt(s.xp)],
+['Улучшений и покупок',s.purchases],
+['Достижения',s.claimedAchievements.length+'/'+achievementList.length],
+['Коллекция',s.owned.length],
+['Время в игре',Math.floor(s.seconds/60)+' мин.']
+].map(([a,b])=>`<div class="setting"><span>${a}</span><b>${b}</b></div>`).join('');
+
+for(const k of ['sound','vibration','animation','dark']){
+$(k+'Setting').checked=s.settings[k];
+}
+}
+
+function rename(){
+const name=$('nameInput').value.trim();
+if(!name){toast('Введи имя');return}
+s.name=name.slice(0,24);
+$('nameInput').value='';
+renderProfile();
+save();
+toast('Имя изменено');
+}
+
+function setting(key,value){
+s.settings[key]=value;
+appearance();
+save();
+}
+
+function redeem(){
+const code=$('promoInput').value.trim().toUpperCase();
+const codes={CAPY2026:1000,ORANGE:500,WELCOME:250};
+if(!Object.prototype.hasOwnProperty.call(codes,code)){toast('Промокод не найден');return}
+if(s.promos.includes(code)){toast('Промокод уже использован');return}
+s.promos.push(code);
+addCoins(codes[code]);
+$('promoInput').value='';
+toast('Промокод: +'+codes[code]+' монет');
+refreshPage();
+save();
+}
+
+function exportSave(){
+save();
+const blob=new Blob([JSON.stringify(s,null,2)],{type:'application/json'});
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;
+a.download='capybara-save.json';
+a.click();
+setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function validSave(d){
+if(!d||typeof d!=='object'||typeof d.name!=='string')return false;
+const numbers=['coins','earned','taps','xp','energy','auto','passive','purchases','seconds'];
+if(!numbers.every(k=>Number.isFinite(d[k])&&d[k]>=0))return false;
+if(!['tap','capacity','regen','multi'].every(k=>Number.isFinite(d[k])&&d[k]>=1&&d[k]<=1000000))return false;
+return ['owned','promos','claimedTasks','claimedAchievements'].every(k=>Array.isArray(d[k]));
+}
+
+async function importSave(event){
+try{
+const file=event.target.files[0];
+if(!file)return;
+const data=JSON.parse(await file.text());
+if(!validSave(data))throw Error();
+if(!confirm('Заменить текущий прогресс импортированным?'))return;
+s={...fresh(),...data};
+s.settings={...fresh().settings,...data.settings};
+s.energy=Math.min(maxEnergy(),s.energy);
+dailyCheck();
+appearance();
+refreshPage();
+save();
+toast('Прогресс восстановлен');
+}catch(e){toast('Некорректный файл сохранения')}
+finally{event.target.value=''}
+}
+
+function resetGame(){
+if(!confirm('Удалить текущий прогресс? Это действие нельзя отменить.'))return;
+renderRating();
+s=fresh();
+lastTick=Date.now();
+autoBank=0;
+appearance();
+refreshPage();
+save();
+toast('Начата новая игра');
+}
+
+function offlineProgress(){
+const seconds=Math.min(28800,Math.max(0,(Date.now()-s.lastSeen)/1000));
+if(seconds<30)return;
+const reward=Math.floor(seconds*(s.passive*2+s.auto*s.tap)*s.multi);
+s.energy=Math.min(maxEnergy(),s.energy+seconds*s.regen);
+if(reward>0){
+addCoins(reward);
+modal('🌙 С возвращением!','Пока тебя не было, капибара заработала '+fmt(reward)+' монет. Офлайн-доход начисляется максимум за 8 часов.');
+}
+}
+
+dailyCheck();
+offlineProgress();
+appearance();
+render();
+save();
+
+setInterval(()=>{
+const now=Date.now();
+const elapsed=Math.max(0,(now-lastTick)/1000);
+lastTick=now;
+dailyCheck();
+
+if(elapsed>30){
+const t=Math.min(28800,elapsed);
+addCoins(Math.floor(t*(s.passive*2+s.auto*s.tap)*s.multi));
+s.energy=Math.min(maxEnergy(),s.energy+t*s.regen);
+}else{
+s.seconds+=elapsed;
+s.energy=Math.min(maxEnergy(),s.energy+s.regen*elapsed);
+addCoins(passiveIncome()*elapsed);
+autoBank+=s.auto*elapsed;
+const autoTaps=Math.floor(autoBank);
+autoBank-=autoTaps;
+if(autoTaps>0){
+s.taps+=autoTaps;
+s.daily.taps+=autoTaps;
+s.xp+=autoTaps;
+addCoins(autoTaps*power());
+}
+}
+
+render();
+
+if(page==='shop'){
+$('shopContent').querySelectorAll('button[data-cost]').forEach(b=>{
+if(b.textContent!=='Выбрано')b.disabled=s.coins<Number(b.dataset.cost);
+});
+}
+if(page==='tasks')renderTasks();
+
+save();
+},1000);
+
+document.addEventListener('visibilitychange',()=>{
+if(document.hidden)save();
+});
+
+window.addEventListener('pagehide',save);
+</script>
+</body>
+</html>
+
+<style>
+/* ТАПАЙ КАПИБАРУ — обновление 1.1 */
+
+body[data-theme="black"] {
+  --bg: #101210;
+  --card: #202420;
+  --green: #72965a;
+  --text: #f3f5f0;
+  --muted: #9da69a;
+  --gold: #e8b451;
+}
+
+body[data-theme="white"] {
+  --bg: #f1f2f5;
+  --card: #ffffff;
+  --green: #66894f;
+  --text: #252525;
+  --muted: #898d93;
+  --gold: #ecad42;
+}
+
+body[data-theme="green"] {
+  --bg: #e0ebd4;
+  --card: #f4f8ed;
+  --green: #66894f;
+  --text: #35432d;
+  --muted: #849478;
+  --gold: #ecad42;
+}
+
+body[data-theme="pink"] {
+  --bg: #f8dce7;
+  --card: #fff1f6;
+  --green: #c77c9c;
+  --text: #78465c;
+  --muted: #b1889b;
+  --gold: #e6a67d;
+}
+
+body {
+  transition: background .25s, color .25s;
+}
+
+body[data-theme] .fill:not(.energy-fill) {
+  background: var(--green);
+}
+
+body[data-theme] nav button.active {
+  color: var(--green);
+  background: color-mix(in srgb,
+    var(--green) 15%, transparent);
+}
+
+body[data-theme] .reward {
+  color: var(--green);
+}
+
+body[data-theme] .gold {
+  background: var(--gold);
+}
+
+body[data-theme="black"] #habitat:not(.beach):not(.forest):not(.night) {
+  background: linear-gradient(
+    #28332d, #39483c 66%, #263c29 67%
+  );
+}
+
+body[data-theme="white"] #habitat:not(.beach):not(.forest):not(.night) {
+  background: linear-gradient(
+    #f7f8fa, #e6e9ee 66%, #d6dce0 67%
+  );
+}
+
+body[data-theme="pink"] #habitat:not(.beach):not(.forest):not(.night) {
+  background: linear-gradient(
+    #fbdce9, #f9c9dc 66%, #eab0c8 67%
+  );
+}
+
+body.no-animation * {
+  transition: none !important;
+  animation: none !important;
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.theme-option {
+  border: 3px solid transparent;
+  border-radius: 20px;
+  padding: 10px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: .2s;
+}
+
+.theme-option.selected {
+  border-color: var(--green);
+}
+
+.theme-option.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--green);
+  color: white;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.theme-preview {
+  height: 115px;
+  border-radius: 12px;
+  padding: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.theme-preview-card {
+  border-radius: 9px;
+  padding: 8px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.theme-preview-capy {
+  text-align: center;
+  font-size: 28px;
+}
+
+.theme-preview-bar {
+  height: 7px;
+  border-radius: 10px;
+}
+
+.theme-name {
+  text-align: center;
+  font-weight: bold;
+  padding-top: 10px;
+  font-size: 14px;
+}
+</style>
+
+<script>
+(function themeUpdate() {
+
+  const themes = [
+    {
+      id: 'black',
+      name: 'Чёрная',
+      bg: '#101210',
+      card: '#292d29',
+      text: '#ffffff',
+      accent: '#72965a'
+    },
+    {
+      id: 'white',
+      name: 'Белая',
+      bg: '#f1f2f5',
+      card: '#ffffff',
+      text: '#252525',
+      accent: '#66894f'
+    },
+    {
+      id: 'green',
+      name: 'Зелёная',
+      bg: '#e0ebd4',
+      card: '#f4f8ed',
+      text: '#35432d',
+      accent: '#66894f'
+    },
+    {
+      id: 'pink',
+      name: 'Розовая',
+      bg: '#f8dce7',
+      card: '#fff1f6',
+      text: '#78465c',
+      accent: '#c77c9c'
+    }
+  ];
+
+  const themeKey = 'capybara_selected_theme';
+
+  let activeTheme = 'green';
+
+  try {
+    activeTheme =
+      localStorage.getItem(themeKey) ||
+      (s.settings.dark ? 'black' : 'green');
+  } catch (e) {}
+
+  function applyTheme(id) {
+    if (!themes.some(t => t.id === id)) {
+      id = 'green';
+    }
+
+    activeTheme = id;
+    document.body.dataset.theme = id;
+
+    s.settings.dark = id === 'black';
+
+    document.body.classList.toggle(
+      'dark', id === 'black'
+    );
+
+    try {
+      localStorage.setItem(themeKey, id);
+    } catch (e) {}
+
+    const theme = themes.find(t => t.id === id);
+
+    const meta = document.querySelector(
+      'meta[name="theme-color"]'
+    );
+
+    if (meta) meta.content = theme.bg;
+
+    document.querySelectorAll(
+      '.theme-option'
+    ).forEach(el => {
+      el.classList.toggle(
+        'selected', el.dataset.themeId === id
+      );
+    });
+
+    if (typeof save === 'function') save();
+  }
+
+  function createThemeSettings() {
+
+    if (document.getElementById('themeSettings')) {
+      return;
+    }
+
+    const darkInput =
+      document.getElementById('darkSetting');
+
+    if (!darkInput) return;
+
+    // Скрываем старый переключатель тёмной темы.
+    const oldLabel = darkInput.closest('label');
+
+    if (oldLabel) {
+      oldLabel.style.display = 'none';
+    }
+
+    const settingsCard =
+      darkInput.closest('.card');
+
+    if (!settingsCard) return;
+
+    const themeCard =
+      document.createElement('div');
+
+    themeCard.className = 'card';
+    themeCard.id = 'themeSettings';
+
+    themeCard.innerHTML = `
+      <b>🎨 Оформление игры</b>
+      <p class="small">
+        Выбери любимую цветовую тему
+      </p>
+      <div class="theme-grid">
+        ${themes.map(t => `
+          <div
+            class="theme-option
+            ${activeTheme === t.id ? 'selected' : ''}"
+            data-theme-id="${t.id}"
+            style="background:${t.card};
+                   color:${t.text}"
+          >
+            <div class="theme-preview"
+                 style="background:${t.bg}">
+              <div class="theme-preview-card"
+                   style="background:${t.card}">
+                🪙 1 250
+              </div>
+              <div class="theme-preview-capy">
+                🦫
+              </div>
+              <div class="theme-preview-bar"
+                   style="background:${t.accent}">
+              </div>
+            </div>
+            <div class="theme-name">
+              ${t.name}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    settingsCard.after(themeCard);
+
+    themeCard.querySelectorAll(
+      '.theme-option'
+    ).forEach(el => {
+      el.addEventListener('click', () => {
+        applyTheme(el.dataset.themeId);
+
+        const theme = themes.find(
+          t => t.id === activeTheme
+        );
+
+        toast('Тема: ' + theme.name);
+      });
+    });
+  }
+
+  createThemeSettings();
+  applyTheme(activeTheme);
+
+  document.querySelectorAll('#profile p.small')
+    .forEach(el => {
+      if (el.textContent.includes('Версия 1.0')) {
+        el.textContent =
+          'ТАПАЙ КАПИБАРУ • Версия 1.1';
+      }
+    });
+
+})();
+</script>
+</html>
+
+<style>
+#app header .avatar {
+    display: none !important;
+}
+</style>
+
+<!-- ТАПАЙ КАПИБАРУ 1.2 -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+.online-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    margin: 10px 0;
+}
+
+.online-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #929292;
+}
+
+.online-dot.connected {
+    background: #68b957;
+    box-shadow: 0 0 8px #68b95766;
+}
+
+.online-me {
+    border: 2px solid var(--green);
+}
+
+.online-rank {
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--green);
+    margin: 12px 0;
+}
+
+.online-skin {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    display: grid;
+    place-items: center;
+    font-size: 25px;
+    flex-shrink: 0;
+}
+
+.online-score {
+    font-size: 13px;
+    font-weight: bold;
+    text-align: right;
+}
+
+.online-error {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+    color: var(--muted);
+}
+
+.online-note {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted);
+}
+</style>
+
+<script>
+(function () {
+
+const PROJECT_URL =
+    'https://ppnwvhrcnfpcjhylzklq.supabase.co';
+
+const PUBLIC_KEY =
+    'sb_publishable_-awyeWIPDSXwuIfiUEDQrA_Icl-505S';
+
+const ratingPage = document.getElementById('rating');
+
+ratingPage.innerHTML = `
+    <h2>🏆 Мировой рейтинг</h2>
+
+    <div class="card">
+        <div class="online-status">
+            <div id="onlineDot" class="online-dot"></div>
+            <span id="onlineStatus">
+                Подключение...
+            </span>
+        </div>
+
+        <div id="onlineError" class="online-error"></div>
+
+        <p class="small">
+            Соревнуйся с игроками со всего мира!
+        </p>
+    </div>
+
+    <div class="card" style="text-align:center">
+
+        <div class="small">Твоё место</div>
+
+        <div class="online-rank" id="myRank">
+            —
+        </div>
+
+        <div class="small" id="playerCount">
+            Загрузка игроков...
+        </div>
+
+    </div>
+
+    <button class="full" id="refreshRating">
+        🔄 Обновить рейтинг
+    </button>
+
+    <h3>Лучшие игроки</h3>
+
+    <div id="leaderboard">
+        <div class="card">
+            Загрузка...
+        </div>
+    </div>
+
+    <p class="online-note">
+        В рейтинг отправляются игровой ник,
+        уровень, скин, количество нажатий
+        и заработанных монет.
+        Используй игровой ник вместо настоящего имени.
+    </p>
+`;
+
+let db = null;
+let user = null;
+let connecting = null;
+let busy = false;
+
+const colors = {
+    classic: '#bb8855',
+    chocolate: '#795338',
+    golden: '#e7b44d',
+    pink: '#e5a4b7',
+    mint: '#95c6a2',
+    cosmic: '#9994cf'
+};
+
+function status(message, connected = false, error = '') {
+
+    document.getElementById('onlineStatus')
+        .textContent = message;
+
+    document.getElementById('onlineDot')
+        .classList.toggle('connected', connected);
+
+    document.getElementById('onlineError')
+        .textContent = error;
+}
+
+async function connect() {
+
+    if (!navigator.onLine) {
+        throw new Error('Нет подключения к интернету');
+    }
+
+    if (!window.supabase) {
+        throw new Error(
+            'Библиотека Supabase не загрузилась. Перезапусти игру с интернетом.'
+        );
+    }
+
+    if (user && db) return true;
+
+    if (connecting) return connecting;
+
+    connecting = (async function () {
+
+        if (!db) {
+
+            db = window.supabase.createClient(
+                PROJECT_URL,
+                PUBLIC_KEY,
+                {
+                    auth: {
+                        persistSession: true,
+                        autoRefreshToken: true,
+                        detectSessionInUrl: false
+                    }
+                }
+            );
+        }
+
+        const sessionResult =
+            await db.auth.getSession();
+
+        if (sessionResult.error) {
+            throw sessionResult.error;
+        }
+
+        if (sessionResult.data.session) {
+
+            user = sessionResult.data.session.user;
+
+        } else {
+
+            const result =
+                await db.auth.signInAnonymously();
+
+            if (result.error) {
+                throw result.error;
+            }
+
+            user = result.data.user;
+        }
+
+        if (!user) {
+            throw new Error(
+                'Не удалось создать игровой профиль'
+            );
+        }
+
+        status('Подключено к серверу', true);
+
+        return true;
+
+    })();
+
+    try {
+        return await connecting;
+    } finally {
+        connecting = null;
+    }
+}
+
+async function syncPlayer() {
+
+    await connect();
+
+    const player = {
+
+        player_id: user.id,
+
+        name: String(
+            s.name || 'Капибаровод'
+        ).slice(0, 24),
+
+        coins: Math.max(
+            0, Math.floor(s.earned)
+        ),
+
+        taps: Math.max(
+            0, Math.floor(s.taps)
+        ),
+
+        level: level(),
+
+        skin: s.skin || 'classic',
+
+        updated_at: new Date().toISOString()
+    };
+
+    const result = await db
+        .from('capybara_leaderboard')
+        .upsert(player, {
+            onConflict: 'player_id'
+        });
+
+    if (result.error) {
+        throw result.error;
+    }
+
+    status('Результат синхронизирован', true);
+
+    return player;
+}
+
+function showError(error) {
+
+    console.error(error);
+
+    status(
+        navigator.onLine
+            ? 'Ошибка подключения'
+            : 'Нет интернета',
+        false,
+        error.message || String(error)
+    );
+}
+
+function localFallback() {
+
+    const board =
+        document.getElementById('leaderboard');
+
+    board.innerHTML = '';
+
+    const card = document.createElement('div');
+
+    card.className = 'card';
+
+    card.textContent =
+        'Онлайн-рейтинг временно недоступен.';
+
+    board.appendChild(card);
+
+    const progress = document.createElement('div');
+
+    progress.className = 'card';
+
+    progress.textContent =
+        s.name + ' — ' + fmt(s.earned) + ' монет';
+
+    board.appendChild(progress);
+
+    document.getElementById('myRank')
+        .textContent = '—';
+
+    document.getElementById('playerCount')
+        .textContent = 'Нет данных';
+}
+
+async function updateOnlineRating() {
+
+    if (busy) return;
+
+    busy = true;
+
+    const button =
+        document.getElementById('refreshRating');
+
+    button.disabled = true;
+    button.textContent = 'Обновление...';
+
+    try {
+
+        const player = await syncPlayer();
+
+        const result = await db
+            .from('capybara_leaderboard')
+            .select('*')
+            .order('coins', {
+                ascending: false
+            })
+            .order('player_id', {
+                ascending: true
+            })
+            .limit(100);
+
+        if (result.error) {
+            throw result.error;
+        }
+
+        const players = result.data || [];
+
+        const total = await db
+            .from('capybara_leaderboard')
+            .select('player_id', {
+                count: 'exact',
+                head: true
+            });
+
+        if (total.error) {
+            throw total.error;
+        }
+
+        const higher = await db
+            .from('capybara_leaderboard')
+            .select('player_id', {
+                count: 'exact',
+                head: true
+            })
+            .gt('coins', player.coins);
+
+        if (higher.error) {
+            throw higher.error;
+        }
+
+        const tied = await db
+            .from('capybara_leaderboard')
+            .select('player_id', {
+                count: 'exact',
+                head: true
+            })
+            .eq('coins', player.coins)
+            .lt('player_id', user.id);
+
+        if (tied.error) {
+            throw tied.error;
+        }
+
+        const rank =
+            (higher.count || 0) +
+            (tied.count || 0) + 1;
+
+        document.getElementById('myRank')
+            .textContent = '#' + rank;
+
+        document.getElementById('playerCount')
+            .textContent =
+                'Всего игроков: ' + total.count;
+
+        document.getElementById('leaderboard')
+            .innerHTML = players.map((p, i) => {
+
+                const me =
+                    p.player_id === user.id;
+
+                const medal =
+                    ['🥇', '🥈', '🥉'][i] || i + 1;
+
+                return `
+                    <div class="card item
+                        ${me ? 'online-me' : ''}">
+
+                        <div class="item-icon">
+                            ${medal}
+                        </div>
+
+                        <div class="online-skin"
+                            style="background:${
+                                colors[p.skin] ||
+                                colors.classic
+                            }">
+
+                            🦫
+
+                        </div>
+
+                        <div class="item-body">
+
+                            <b>
+                                ${escapeHTML(p.name)}
+                                ${me ? '(Ты)' : ''}
+                            </b>
+
+                            <p>
+                                Уровень ${fmt(p.level)}
+                            </p>
+
+                            <p>
+                                ${fmt(p.taps)} нажатий
+                            </p>
+
+                        </div>
+
+                        <div class="online-score">
+                            🪙 ${fmt(p.coins)}
+                        </div>
+
+                    </div>
+                `;
+
+            }).join('');
+
+        status('Рейтинг обновлён', true);
+
+    } catch (error) {
+
+        showError(error);
+        localFallback();
+
+    } finally {
+
+        busy = false;
+
+        button.disabled = false;
+
+        button.textContent =
+            '🔄 Обновить рейтинг';
+    }
+}
+
+async function backgroundSync() {
+
+    if (busy || !navigator.onLine) return;
+
+    busy = true;
+
+    try {
+
+        await syncPlayer();
+
+    } catch (error) {
+
+        showError(error);
+
+    } finally {
+
+        busy = false;
+    }
+}
+
+document.getElementById('refreshRating')
+    .addEventListener(
+        'click', updateOnlineRating
+    );
+
+window.updateOnlineRating =
+    updateOnlineRating;
+
+renderRating = function () {
+
+    updateOnlineRating();
+};
+
+setInterval(function () {
+
+    if (document.hidden) return;
+
+    if (!navigator.onLine) {
+
+        status('Нет интернета');
+        return;
+    }
+
+    if (page === 'rating') {
+
+        updateOnlineRating();
+
+    } else {
+
+        backgroundSync();
+    }
+
+}, 30000);
+
+window.addEventListener('online', function () {
+
+    if (page === 'rating') {
+
+        updateOnlineRating();
+
+    } else {
+
+        backgroundSync();
+    }
+});
+
+window.addEventListener('offline', function () {
+
+    status('Нет интернета');
+});
+
+document.querySelectorAll('#profile p.small')
+    .forEach(function (el) {
+
+        if (el.textContent.includes('Версия')) {
+
+            el.textContent =
+                'ТАПАЙ КАПИБАРУ • Версия 1.2';
+        }
+    });
+
+backgroundSync();
+
+})();
+</script>
+</html>
+
+<style>
+.online-skin {
+    width: 65px !important;
+    height: 65px !important;
+    border-radius: 18px !important;
+    background: var(--bg) !important;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.online-skin svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    padding: 3px;
+}
+
+.online-me {
+    border: 2px solid var(--green);
+}
+</style>
+
+<script>
+(function () {
+
+    const skinColors = {
+        classic: '#bb8855',
+        chocolate: '#795338',
+        golden: '#e7b44d',
+        pink: '#e5a4b7',
+        mint: '#95c6a2',
+        cosmic: '#9994cf'
+    };
+
+    function updateCapybaraAvatars() {
+
+        const original =
+            document.querySelector('#capy svg');
+
+        if (!original) return;
+
+        document.querySelectorAll(
+            '#leaderboard .online-skin'
+        ).forEach(function (avatar) {
+
+            const card = avatar.closest('.item');
+            const isMe = card &&
+                card.classList.contains('online-me');
+
+            const color = isMe
+                ? (skinColors[s.skin] || skinColors.classic)
+                : (avatar.style.backgroundColor ||
+                   skinColors.classic);
+
+            const signature = color + ':' +
+                (isMe ? s.accessory : 'orange');
+
+            if (
+                avatar.dataset.rendered === signature &&
+                avatar.querySelector('svg')
+            ) return;
+
+            const svg = original.cloneNode(true);
+
+            const body =
+                svg.querySelector('[id="capyBody"]');
+
+            const orange =
+                svg.querySelector('[id="accessoryOrange"]');
+
+            const accessory =
+                svg.querySelector('[id="accessoryOther"]');
+
+            if (body) {
+                body.setAttribute('fill', color);
+            }
+
+            if (!isMe) {
+
+                if (orange) {
+                    orange.style.display = '';
+                }
+
+                if (accessory) {
+                    accessory.textContent = '';
+                }
+
+            }
+
+            svg.querySelectorAll('[id]')
+                .forEach(function (el) {
+                    el.removeAttribute('id');
+                });
+
+            svg.setAttribute(
+                'viewBox', '20 5 290 240'
+            );
+
+            avatar.replaceChildren(svg);
+
+            avatar.dataset.rendered = signature;
+
+        });
+    }
+
+    const board =
+        document.getElementById('leaderboard');
+
+    if (board) {
+
+        const observer = new MutationObserver(
+            updateCapybaraAvatars
+        );
+
+        observer.observe(board, {
+            childList: true,
+            subtree: true
+        });
+
+    }
+
+    setInterval(function () {
+
+        if (page === 'rating') {
+            updateCapybaraAvatars();
+        }
+
+    }, 1000);
+
+    document.querySelectorAll('#profile p.small')
+        .forEach(function (el) {
+
+            if (el.textContent.includes('Версия')) {
+
+                el.textContent =
+                    'ТАПАЙ КАПИБАРУ • Версия 1.3';
+
+            }
+
+        });
+
+    updateCapybaraAvatars();
+
+})();
+</script>
+</html>
+
+<script>
+(function () {
+
+    const projectUrl =
+        'https://ppnwvhrcnfpcjhylzklq.supabase.co';
+
+    const publicKey =
+        'sb_publishable_-awyeWIPDSXwuIfiUEDQrA_Icl-505S';
+
+    if (!window.supabase) return;
+
+    const nicknameClient =
+        window.supabase.createClient(
+            projectUrl,
+            publicKey,
+            {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: false,
+                    detectSessionInUrl: false
+                }
+            }
+        );
+
+    let nicknameBusy = false;
+
+    async function updateNickname() {
+
+        if (nicknameBusy) return;
+
+        if (s.name !== 'Капибаровод') return;
+
+        if (!navigator.onLine) return;
+
+        nicknameBusy = true;
+
+        try {
+
+            const result =
+                await nicknameClient.auth.getSession();
+
+            const user =
+                result.data.session?.user;
+
+            if (!user) return;
+
+            const response = await nicknameClient
+                .from('capybara_leaderboard')
+                .select('name')
+                .eq('player_id', user.id)
+                .maybeSingle();
+
+            if (response.error) return;
+
+            const newName = response.data?.name;
+
+            if (
+                newName &&
+                newName !== 'Капибаровод' &&
+                s.name === 'Капибаровод'
+            ) {
+
+                s.name = newName;
+
+                save();
+
+                if (page === 'profile') {
+                    renderProfile();
+                }
+
+                if (page === 'rating') {
+                    renderRating();
+                }
+
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+        } finally {
+
+            nicknameBusy = false;
+
+        }
+    }
+
+    setInterval(updateNickname, 5000);
+
+    updateNickname();
+
+    document.querySelectorAll('#profile p.small')
+        .forEach(el => {
+            if (el.textContent.includes('Версия')) {
+                el.textContent =
+                    'ТАПАЙ КАПИБАРУ • Версия 1.4';
+            }
+        });
+
+})();
+</script>
+</html>
+
+<!-- Обновление 1.5 — текущие монеты в рейтинге -->
+<script>
+(function () {
+
+    const originalCreateClient =
+        window.supabase.createClient;
+
+    // Исправляем количество монет при отправке
+    // результата в Supabase.
+    const originalFetch = window.fetch;
+
+    window.fetch = async function (input, options) {
+
+        const url = typeof input === 'string'
+            ? input
+            : input.url || String(input);
+
+        if (
+            url.startsWith(
+                'https://ppnwvhrcnfpcjhylzklq.supabase.co/'
+            ) &&
+            url.includes('/rest/v1/capybara_leaderboard')
+        ) {
+
+            if (options && options.body &&
+                typeof options.body === 'string') {
+
+                try {
+
+                    const data = JSON.parse(options.body);
+
+                    const balance = Math.max(
+                        0, Math.floor(Number(s.coins))
+                    );
+
+                    if (Number.isFinite(balance)) {
+
+                        const players = Array.isArray(data)
+                            ? data : [data];
+
+                        players.forEach(player => {
+                            if ('coins' in player) {
+                                player.coins = balance;
+                            }
+                        });
+
+                        options = {
+                            ...options,
+                            body: JSON.stringify(data)
+                        };
+                    }
+
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+        }
+
+        return originalFetch.call(this, input, options);
+    };
+
+    document.querySelectorAll('#profile p.small')
+        .forEach(el => {
+            if (el.textContent.includes('Версия')) {
+                el.textContent =
+                    'ТАПАЙ КАПИБАРУ • Версия 1.5';
+            }
+        });
+
+})();
+</script>
+</html>
